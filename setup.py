@@ -5,8 +5,8 @@ setup(
     name="maxclientapi",
     version="1.0.0",
     packages=find_packages(),
-    install_requires=["requests", "websockets"],  # зависимости, если есть
-    author="Arsrus721",
+    install_requires=["requests", "websocket-client"],  # зависимости, если есть
+    author="arsrus721",
     description="Моя первая библиотека Python",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
