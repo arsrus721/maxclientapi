@@ -10,6 +10,7 @@ pip install .
 Enjoy!
 
 ## Example code
+# Outdated
 ```python
 import maxclientapi
 import time
