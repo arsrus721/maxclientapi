@@ -23,25 +23,21 @@ class ChatClient:
             ("Origin", self.origin),
             ("User-Agent", self.user_agent)
         ]
-
-        print(f"Preparing to connect to {self.url} with headers:")
-        for header in headers:
-            print(f"  {header[0]}: {header[1]}")
     
         try:
-            print(f"Attempting to connect to WebSocket server at {self.url}...")
+            print(f"Try to connect to {self.url}")
             self.ws = create_connection(self.url, header=[f"{h[0]}: {h[1]}" for h in headers])
-            print("Connected!")
+            print("Connected")
         
             self.running = True
         
             threading.Thread(target=self.listen_handler, daemon=True).start()
 
-            print("Sending handshake to the server...")
+            print(" Sending handshake")
             self.send_info()
     
         except Exception as e:
-            print(f"❌ Error during connection: {e}")
+            print(f"Unknown error: {e}")
             self.running = False
 
     def send_info(self):
@@ -110,19 +106,19 @@ class ChatClient:
 
                     opcode = json_load.get("opcode")
                     if opcode == 48:
-                        print(f"📩 OPCODE 48 received! Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
+                        print(f"opcode 48 received! Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
                     elif opcode == 128:
                         print(f"New message {json_load["payload"]["message"]["text"]}")
                     elif opcode is not None:
-                        print(f"ℹ️ Received opcode {opcode} Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
+                        print(f"received opcode {opcode} Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
                     else:
-                        print(f"⚠️ No opcode field in message: {message}")
+                        print(f"No opcode found in the message: {message}")
 
                 except WebSocketConnectionClosedException:
                     print("Connection closed")
                     break
                 except Exception as e:
-                    print(f"❌ Unhandled error in listener: {e}")
+                    print(f"Unknown error: {e}")
                     continue
         finally:
             if self.ws:
@@ -181,9 +177,9 @@ class ChatClient:
         if self.ws:
             try:
                 self.ws.send(json.dumps(data))
-                print(f"Data sent successfully: {json.dumps(data, indent=2)}")
+                print(f"Data sucessfully sent: {json.dumps(data, indent=2)}")
             except Exception as e:
-                print(f"Error sending data: {e}")
+                print(f"Unknown error: {e}")
         else:
             print("No active WebSocket connection")
 
@@ -213,7 +209,14 @@ class ChatClient:
         def keepalive():
             while self.running:
                 self.seq += 1
-                ping_payload = {"ver": 11, "cmd": 0, "seq": self.seq, "opcode": 1, "payload": {"interactive": False}}
+                ping_payload = {"ver": 11,
+                                "cmd": 0,
+                                "seq": self.seq,
+                                "opcode": 1,
+                                "payload": {
+                                    "interactive": False
+                                    }
+                                }
                 try:
                     self.send(ping_payload)
                 except:
