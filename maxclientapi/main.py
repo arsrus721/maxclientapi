@@ -34,6 +34,8 @@ class ChatClient:
         
             self.running = True
         
+            threading.Thread(target=self.listen_upcomming, daemon=True).start()
+
             print("Sending handshake to the server...")
             self.send_info()
     
@@ -82,6 +84,26 @@ class ChatClient:
             }
         }
         self.send(payload)
+
+    def listen_upcomming(self):
+        try:
+            while self.running:
+                try:
+                    message = self.ws.recv()
+                    json_load = json.loads(message)
+                    opcode = json_load.get(opcode)
+                    if opecode ==  "64":
+                        print(f"OPCODE 64! {message}")
+                    elif message:
+                        print("no opcode  go")
+                except WebSocketConnectionClosedException:
+                    print("Connection closed")
+                    break
+                except Exception as e:
+                    print(f"Unstated error {e}")
+                    continue
+        finally:
+            self.ws.close()
 
     def subscribe_chat(self, chat_id):
         self.seq += 1
