@@ -2,6 +2,8 @@ import json
 import threading
 import time
 from websocket import create_connection, WebSocketConnectionClosedException
+from .listen_handler import listen_handler
+from .start_keepalive import start_keepalive
 
 class ChatClient:
     def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None):
@@ -97,34 +99,7 @@ class ChatClient:
         
         self.send(payload)
 
-    def listen_handler(self):
-        try:
-            while self.running:
-                try:
-                    message = self.ws.recv()
-                    json_load = json.loads(message)
-
-                    opcode = json_load.get("opcode")
-                    if opcode == 48:
-                        print(f"opcode 48 received! Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
-                    elif opcode == 128:
-                        print(f"New message {json_load["payload"]["message"]["text"]}")
-                    elif opcode is not None:
-                        print(f"received opcode {opcode} Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
-                    else:
-                        print(f"No opcode found in the message: {message}")
-
-                except WebSocketConnectionClosedException:
-                    print("Connection closed")
-                    break
-                except Exception as e:
-                    print(f"Unknown error: {e}")
-                    continue
-        finally:
-            if self.ws:
-                self.ws.close()
-
-
+    listen_handler = listen_handler
 
     def subscribe_chat(self, chat_id):
         self.seq += 1
@@ -183,46 +158,7 @@ class ChatClient:
         else:
             print("No active WebSocket connection")
 
-
-    def receive_loop(self, callback):
-        try:
-            while self.running:
-                try:
-                    message = self.ws.recv()
-                except WebSocketConnectionClosedException:
-                    print("WebSocket connection was closed")
-                    break
-                except Exception as e:
-                    print(f"Unknown error: {e}")
-                    continue
-
-                if not message:
-                    continue
-
-                data = json.loads(message)
-                callback(data)
-
-        finally:
-            self.ws.close()
-
-    def start_keepalive(self, interval=30):
-        def keepalive():
-            while self.running:
-                self.seq += 1
-                ping_payload = {"ver": 11,
-                                "cmd": 0,
-                                "seq": self.seq,
-                                "opcode": 1,
-                                "payload": {
-                                    "interactive": False
-                                    }
-                                }
-                try:
-                    self.send(ping_payload)
-                except:
-                    break
-                time.sleep(interval)
-        threading.Thread(target=keepalive, daemon=True).start()
+    start_keepalive = start_keepalive
 
     def stop(self):
         self.running = False
