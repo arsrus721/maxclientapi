@@ -5,6 +5,7 @@ from websocket import create_connection, WebSocketConnectionClosedException
 from .listen_handler import listen_handler
 from .start_keepalive import start_keepalive
 from .send_handshake import send_handshake
+from queue import Queue
 
 class ChatClient:
     def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None):
@@ -20,6 +21,7 @@ class ChatClient:
         self.osVersion = osVersion or "Linux"
         self.deviceId = deviceId
         self.origin = origin or "https://web.max.ru"
+        self.messages_128 = Queue()
 
     def connect(self):
         headers = [
@@ -33,9 +35,7 @@ class ChatClient:
             print("Connected")
         
             self.running = True
-        
             threading.Thread(target=self.listen_handler, daemon=True).start()
-
             print(" Sending handshake")
             self.send_info()
     
@@ -83,6 +83,12 @@ class ChatClient:
         self.send(payload)
 
     listen_handler = listen_handler
+
+    def get_message(self, block=False, timeout=None):
+        try:
+            return self.messages_128.get(block=block, timeout=timeout)
+        except:
+            return None
 
     def subscribe_chat(self, chat_id):
         self.seq += 1

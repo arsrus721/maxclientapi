@@ -8,16 +8,12 @@ def listen_handler(self):
                 try:
                     message = self.ws.recv()
                     json_load = json.loads(message)
-
                     opcode = json_load.get("opcode")
-                    if opcode == 48:
-                        print(f"opcode 48 received! Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
-                    elif opcode == 128:
-                        print(f"New message {json_load["payload"]["message"]["text"]}")
-                    elif opcode is not None:
-                        print(f"received opcode {opcode} Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
-                    else:
-                        print(f"No opcode found in the message: {message}")
+
+                    if opcode == 128:
+                        text = json_load["payload"]["message"]["text"]
+                        self.messages_128.put(text)
+                        print(f"128! {text}")
 
                 except WebSocketConnectionClosedException:
                     print("Connection closed")
