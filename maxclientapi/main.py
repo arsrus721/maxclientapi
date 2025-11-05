@@ -4,22 +4,23 @@ import time
 from websocket import create_connection, WebSocketConnectionClosedException
 
 class ChatClient:
-    def __init__(self, url, token, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, deviceId=None):
+    def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None):
         self.url = url or "wss://ws-api.oneme.ru/websocket"
         self.token = token
         self.watch_chats = watch_chats or []
-        self.user_agent = user_agent or "PythonWebSocketClient/1.0"
+        self.user_agent = user_agent or "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0"
         self.ws = None
         self.seq = 0
         self.running = False
         self.deviceName = deviceName or "Firefox"
-        self.headerUserAgent = user_agent or "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:144.0) Gecko/20100101 Firefox/144.0"
+        self.headerUserAgent = user_agent
         self.osVersion = osVersion or "Linux"
         self.deviceId = deviceId
+        self.origin = origin or "https://web.max.ru"
 
     def connect(self):
         headers = [
-            ("Origin", "https://web.max.ru"),
+            ("Origin", self.origin),
             ("User-Agent", self.user_agent)
         ]
 
@@ -34,7 +35,7 @@ class ChatClient:
         
             self.running = True
         
-            threading.Thread(target=self.listen_upcomming, daemon=True).start()
+            threading.Thread(target=self.listen_handler, daemon=True).start()
 
             print("Sending handshake to the server...")
             self.send_info()
@@ -44,6 +45,7 @@ class ChatClient:
             self.running = False
 
     def send_info(self):
+        print("send info")
         payload = {"ver":11,
                    "cmd":0,
                    "seq":self.seq,
@@ -67,6 +69,7 @@ class ChatClient:
         self.send_handshake()
 
     def send_handshake(self):
+        print("handshake initilazated")
         self.seq += 1
         payload = {
             "ver": 11,
@@ -85,53 +88,94 @@ class ChatClient:
         }
         self.send(payload)
 
-    def listen_upcomming(self):
+    def request_messages(self):
+        self.seq += 1
+        payload = {"ver":11,
+                   "cmd":0,
+                   "seq":self.seq,
+                   "opcode":48,
+                   "payload":{
+                       "chatIds":[0]
+                       }
+                    }
+        
+        self.send(payload)
+
+    def listen_handler(self):
         try:
             while self.running:
                 try:
                     message = self.ws.recv()
                     json_load = json.loads(message)
-                    opcode = json_load.get(opcode)
-                    if opecode ==  "64":
-                        print(f"OPCODE 64! {message}")
-                    elif message:
-                        print("no opcode  go")
+
+                    opcode = json_load.get("opcode")
+                    if opcode == 48:
+                        print(f"📩 OPCODE 48 received! Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
+                    elif opcode == 128:
+                        print(f"New message {json_load["payload"]["message"]["text"]}")
+                    elif opcode is not None:
+                        print(f"ℹ️ Received opcode {opcode} Message: {json.dumps(json_load, indent=2, ensure_ascii=False)}")
+                    else:
+                        print(f"⚠️ No opcode field in message: {message}")
+
                 except WebSocketConnectionClosedException:
                     print("Connection closed")
                     break
                 except Exception as e:
-                    print(f"Unstated error {e}")
+                    print(f"❌ Unhandled error in listener: {e}")
                     continue
         finally:
-            self.ws.close()
+            if self.ws:
+                self.ws.close()
+
+
 
     def subscribe_chat(self, chat_id):
         self.seq += 1
-        payload = {"ver": 11, "cmd": 0, "seq": self.seq, "opcode": 65, "payload": {"chatId": chat_id, "type": "TEXT"}}
+        payload = {"ver":11,
+                   "cmd":0,
+                   "seq":self.seq,
+                   "opcode":75,
+                   "payload":{
+                       "chatId":chat_id,
+                       "subscribe":True
+                       }
+                    }
         self.send(payload)
         print(f"Subscribed to chat: {chat_id}")
 
     def send_message(self, chat_id, text):
         self.seq += 1
         payload = {
-            "ver":11,
-            "cmd":0,
-            "seq":self.seq,
-            "opcode":64,
-            "payload":{
-                "chatId":chat_id,
-                "message":{
-                    "text":text,
-                    "cid":int(time.time()*1000),
-                    "elements":[],
-                    "attaches":[]
+            "ver": 11,
+            "cmd": 0,
+            "seq": self.seq,
+            "opcode": 64,
+            "payload": {
+                "chatId": chat_id,
+                "message": {
+                    "text": text,
+                    "cid": int(time.time() * 1000),
+                    "elements": [],
+                    "attaches": []
                 },
-                "notify":True
+                "notify": True
             }
         }
 
         self.send(payload)
         print(f"Message send to chat: {chat_id} with text: {text}")
+        self.seq += 1
+        payload_1 = {"ver":11,
+                     "cmd":0,
+                     "seq":self.seq,
+                     "opcode":177,
+                     "payload":{
+                         "chatId":chat_id,
+                         "time":0
+                         }
+                    }
+        self.send(payload_1)
 
     def send(self, data):
         if self.ws:
