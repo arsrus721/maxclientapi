@@ -4,6 +4,7 @@ import time
 from websocket import create_connection, WebSocketConnectionClosedException
 from .listen_handler import listen_handler
 from .start_keepalive import start_keepalive
+from .send_handshake import send_handshake
 
 class ChatClient:
     def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None):
@@ -66,25 +67,7 @@ class ChatClient:
         self.send(payload)
         self.send_handshake()
 
-    def send_handshake(self):
-        print("handshake initilazated")
-        self.seq += 1
-        payload = {
-            "ver": 11,
-            "cmd": 0,
-            "seq": self.seq,
-            "opcode": 19,
-            "payload": {
-                "interactive": True,
-                "token": self.token,
-                "chatsCount": len(self.watch_chats),
-                "chatsSync": 0,
-                "contactsSync": 0,
-                "presenceSync": 0,
-                "draftsSync": 0
-            }
-        }
-        self.send(payload)
+    send_handshake = send_handshake
 
     def request_messages(self):
         self.seq += 1
