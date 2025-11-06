@@ -90,6 +90,21 @@ class ChatClient:
         except:
             return None
 
+    def get_video_url(self, videoId, chat_id, messageId):
+        self.seq += 1
+        payload = {"ver":11,
+                   "cmd":0,
+                   "seq":self.seq,
+                   "opcode":83,
+                   "payload":{
+                       "videoId":videoId,
+                       "chatId":chat_id,
+                       "messageId":messageId
+                       }
+                    }
+        self.send(payload)
+        
+
     def subscribe_chat(self, chat_id):
         self.seq += 1
         payload = {"ver":11,
