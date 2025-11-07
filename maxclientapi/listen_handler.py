@@ -53,9 +53,22 @@ def listen_handler(self):
                                     "raw": attach,
                                     "id": message_id
                                 }
-
                                 self.messages_128.put(media_info)
                                 print(f"Video from {sender}: {attach.get('thumbnail')}")
+
+
+                            elif media_type == "FILE":
+                                media_info = {
+                                    "opcode": 128,
+                                    "type": "file",
+                                    "chatId": chat_id,
+                                    "sender": sender,
+                                    "id": message_id
+                                    "name": attach.get("name")
+                                    "size": attach.get("size")
+                                    "fileId": attach.get("fileId")
+                                    "token": attach.get("token")
+                                }
 
                     elif text:
                         text_info = {
@@ -84,6 +97,19 @@ def listen_handler(self):
                     print(f"Gotted url:\n"
                           f"   Page: {external_url}\n"
                           f"   URL: {mp4_1080}")
+                    
+                elif opcode == 87:
+                    url = json_load["payload"]["info"][0]["url"]
+                    token = json_load["payload"]["info"][0]["token"]
+                    fileId = json_load["payload"]["info"][0]["fileId"]
+                    url_from_87 = {
+                        "opcode": 87,
+                        "type": "url_upload",
+                        "url": url,
+                        "token": token,
+                        "fileId": fileId
+                    }
+                    self.messages_128.put(url_from_87)
 
             except WebSocketConnectionClosedException:
                 print("Connection closed")

@@ -103,7 +103,6 @@ class ChatClient:
                        }
                     }
         self.send(payload)
-        
 
     def subscribe_chat(self, chat_id):
         self.seq += 1
@@ -151,6 +150,41 @@ class ChatClient:
                          }
                     }
         self.send(payload_1)
+
+    def request_url_to_send_file(self, count=1):
+        self.seq += 1
+        payload = {"ver":11,
+                   "cmd":0,
+                   "seq":self.seq,
+                   "opcode":87,
+                   "payload":{
+                       "count":count
+                       }
+                    }
+        #print("The code to send files is not implemented yet.")
+        self.send(payload)
+
+    def send_file(self, chatId, fileId):
+        self.seq += 1
+        payload = {"ver":11,
+                        "cmd":0,
+                        "seq":self.seq,
+                        "opcode":64,
+                        "payload":{
+                            "chatId":chatId,
+                            "message":{
+                                "cid":int(time.time() * 1000),
+                                "attaches":[
+                                    {
+                                        "_type":"FILE",
+                                        "fileId":fileId
+                                        }
+                                    ]
+                                },
+                                "notify":True
+                                }
+                            }
+        self.send(payload)
 
     def send(self, data):
         if self.ws:
