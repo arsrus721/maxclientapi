@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 
 setup(
     name="maxclientapi",
-    version="1.2.0",
+    version="2.0.0",
     packages=find_packages(),
-    install_requires=["requests", "websocket-client"], 
+    install_requires=["websocket-client"], 
     author="arsrus721",
     description="A Python library for working with the 'MAX Messenger' WebSocket API",
     long_description=open("README.md").read(),
@@ -16,4 +16,5 @@ setup(
         "License :: OSI Approved :: MIT License",
     ],
 )
+
 
