@@ -3,9 +3,7 @@ A Python library for working with the 'MAX Messenger' WebSocket API
 
 ## Install the library
 ```bash
-git clone https://github.com/arsrus721/maxclientapi.git
-cd maxclientapi
-pip install .
+pip install maxclientapi
 ```
 
 ## Example code
