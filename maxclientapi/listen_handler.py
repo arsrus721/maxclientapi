@@ -120,7 +120,7 @@ def listen_handler(self):
                                     "token": attach.get("token")
                                 }
 
-                            elif media_type == "LINK":
+                            elif media_type == "SHARE":
                                 media_info = {
                                     "opcode": 128,
                                     "type": "link",
