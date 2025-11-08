@@ -148,3 +148,8 @@ while True:
 
         # After the file is uploaded, send it to the chat
         client1.send_file(chatId=chat_id, fileId=fileId)
+
+    elif msg["type"] == "link":
+        print(f"text {msg['text']}")
+        print(f"chat_id {msg['chat_id']}")
+        print(f"sender {msg['sender']}")
