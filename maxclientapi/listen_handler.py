@@ -15,6 +15,7 @@ def listen_handler(self):
                     message_data = payload.get("message", {})
                     chat_id = payload.get("chatId")
                     sender = message_data.get("sender")
+                    elements = message_data.get("elements", [])
 
                     attaches = message_data.get("attaches")
                     text = message_data.get("text")
@@ -131,6 +132,18 @@ def listen_handler(self):
                                 self.messages.put(media_info)
                                 print(f"Link from {sender}")
 
+                    elif elements:
+                            if media_type == "SHARE":
+                                media_info = {
+                                    "opcode": 128,
+                                    "type": "link",
+                                    "chat_id": chat_id,
+                                    "sender": sender,
+                                    "text": text
+                                }
+                                self.messages.put(media_info)
+                                print(f"Link from {sender}")
+                    
                     elif text:
                         text_info = {
                             "opcode": 128,
