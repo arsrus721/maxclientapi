@@ -59,6 +59,22 @@ while True:
         print("height", msg["height"])
         print("raw", msg["raw"])
 
+    # If the message contains a photo with text
+    elif msg["type"] == "photo_with_text":
+        print("text", msg["text"])
+        print("chat_id", msg["chat_id"])
+        print("sender", msg["sender"])
+        print("id", msg["id"])
+        print("time", msg["time"])
+        print("utype", msg["utype"])
+        print("baseUrl", msg["baseUrl"])
+        print("previewData", msg["previewData"])
+        print("photoToken", msg["photoToken"])
+        print("width", msg["width"])
+        print("photoId", msg["photoId"])
+        print("height", msg["height"])
+        print("raw", msg["raw"])
+
     # If the message contains a video
     elif msg["type"] == "video":
         print(f"chat_id {msg['chat_id']}")
@@ -80,6 +96,29 @@ while True:
 
         # Request the video URL for downloading
         client1.get_video_url(videoId=msg["videoId"], chat_id=chat_id, messageId=msg["id"])
+
+    # If the message contains a video with text
+    elif msg["type"] == "video_with_text":
+        print(f"text {msg["text"]}")
+        print(f"chat_id {msg["chat_id"]}")
+        print(f"sender {msg["sender"]}")
+        print(f"thumbnail {msg["thumbnail"]}")
+        print(f"time {msg["duration"]}")
+        print(f"utype {msg["width"]}")
+        print(f"baseUrl {msg["videoId"]}")
+        print(f"previewData {msg["token"]}")
+        print(f"photoToken {msg["height"]}")
+        print(f"width {msg["raw"]}")
+        print(f"photoId {msg["id"]}")
+        print(f"height {msg["time"]}")
+        print(f"raw {msg["utype"]}")
+        print(f"raw {msg["prevMessageId"]}")
+
+        # Save the video token
+        token_file = msg["token"]
+
+        # Request the video URL for downloading
+        client1.get_video_url(videoId=msg["videoId"], chat_id, messageId=msg["id"])
 
     # If the message is a regular text message
     elif msg["type"] == "text":

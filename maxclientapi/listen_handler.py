@@ -24,47 +24,88 @@ def listen_handler(self):
                             media_type = attach.get("_type")
 
                             if media_type == "PHOTO":
-                                media_info = {
-                                    "opcode": 128,
-                                    "type": "photo",
-                                    "chat_id": chat_id,
-                                    "sender": sender,
-                                    "id": message_data.get("id"),
-                                    "time": message_data.get("time"),
-                                    "utype": message_data.get("type"),
-                                    "baseUrl": attach.get("baseUrl"),
-                                    "previewData": attach.get("previewData"),
-                                    "photoToken": attach.get("photoToken"),
-                                    "width": attach.get("width"),
-                                    "photoId": attach.get("photoId"),
-                                    "height": attach.get("height"),
-                                    "raw": attach
-                                }
-                                self.messages.put(media_info)
-                                print(f"Photo from {sender}")
+                                if text == "":
+                                    media_info = {
+                                        "opcode": 128,
+                                        "type": "photo",
+                                        "chat_id": chat_id,
+                                        "sender": sender,
+                                        "id": message_data.get("id"),
+                                        "time": message_data.get("time"),
+                                        "utype": message_data.get("type"),
+                                        "baseUrl": attach.get("baseUrl"),
+                                        "previewData": attach.get("previewData"),
+                                        "photoToken": attach.get("photoToken"),
+                                        "width": attach.get("width"),
+                                        "photoId": attach.get("photoId"),
+                                        "height": attach.get("height"),
+                                        "raw": attach
+                                    }
+                                    self.messages.put(media_info)
+                                    print(f"Photo from {sender}")
+                                else:
+                                    media_info = {
+                                        "opcode": 128,
+                                        "type": "photo_with_text",
+                                        "text": text,
+                                        "chat_id": chat_id,
+                                        "sender": sender,
+                                        "id": message_data.get("id"),
+                                        "time": message_data.get("time"),
+                                        "utype": message_data.get("type"),
+                                        "baseUrl": attach.get("baseUrl"),
+                                        "previewData": attach.get("previewData"),
+                                        "photoToken": attach.get("photoToken"),
+                                        "width": attach.get("width"),
+                                        "photoId": attach.get("photoId"),
+                                        "height": attach.get("height"),
+                                        "raw": attach
+                                    }
+                                    self.messages.put(media_info)
+                                    print(f"Photo with text from {sender}")
 
                             elif media_type == "VIDEO":
-                                media_info = {
-                                    "opcode": 128,
-                                    "type": "video",
-                                    "chat_id": chat_id,
-                                    "sender": sender,
-                                    "thumbnail": attach.get("thumbnail"),
-                                    "duration": attach.get("duration"),
-                                    "width": attach.get("width"),
-                                    "videoId": attach.get("videoId"),
-                                    "token": attach.get("token"),
-                                    "height": attach.get("height"),
-                                    "raw": attach,
-                                    "id": message_data.get("id"),
-                                    "time": message_data.get("time"),
-                                    "utype": message_data.get("type"),
-                                    "prevMessageId": payload.get("prevMessageId")
-
-                                }
-                                self.messages.put(media_info)
-                                print(f"Video from {sender}")
-
+                                if text == "":
+                                    media_info = {
+                                        "opcode": 128,
+                                        "type": "video",
+                                        "chat_id": chat_id,
+                                        "sender": sender,
+                                        "thumbnail": attach.get("thumbnail"),
+                                        "duration": attach.get("duration"),
+                                        "width": attach.get("width"),
+                                        "videoId": attach.get("videoId"),
+                                        "token": attach.get("token"),
+                                        "height": attach.get("height"),
+                                        "raw": attach,
+                                        "id": message_data.get("id"),
+                                        "time": message_data.get("time"),
+                                        "utype": message_data.get("type"),
+                                        "prevMessageId": payload.get("prevMessageId")
+                                    }
+                                    self.messages.put(media_info)
+                                    print(f"Video from {sender}")
+                                else:
+                                    media_info = {
+                                        "opcode": 128,
+                                        "type": "video_with_text",
+                                        "text": text,
+                                        "chat_id": chat_id,
+                                        "sender": sender,
+                                        "thumbnail": attach.get("thumbnail"),
+                                        "duration": attach.get("duration"),
+                                        "width": attach.get("width"),
+                                        "videoId": attach.get("videoId"),
+                                        "token": attach.get("token"),
+                                        "height": attach.get("height"),
+                                        "raw": attach,
+                                        "id": message_data.get("id"),
+                                        "time": message_data.get("time"),
+                                        "utype": message_data.get("type"),
+                                        "prevMessageId": payload.get("prevMessageId")
+                                    }
+                                    self.messages.put(media_info)
+                                    print(f"Video with text from {sender}")
 
                             elif media_type == "FILE":
                                 media_info = {
