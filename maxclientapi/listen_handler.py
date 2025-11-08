@@ -120,6 +120,17 @@ def listen_handler(self):
                                     "token": attach.get("token")
                                 }
 
+                            elif media_type == "LINK":
+                                media_info = {
+                                    "opcode": 128,
+                                    "type": "link",
+                                    "chat_id": chat_id,
+                                    "sender": sender,
+                                    "text": text
+                                }
+                                self.messages.put(media_info)
+                                print(f"Link from {sender}")
+
                     elif text:
                         text_info = {
                             "opcode": 128,
