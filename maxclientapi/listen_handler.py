@@ -187,6 +187,8 @@ def listen_handler(self):
 
             except WebSocketConnectionClosedException:
                 print("Connection closed")
+                print("Reconnecting...")
+                self.connect()
                 break
             except Exception as e:
                 print(f"Unknown error: {e}")
