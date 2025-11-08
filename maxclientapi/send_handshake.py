@@ -1,7 +1,7 @@
 # maxclientapi/send_handshake.py
 
 def send_handshake(self):
-        print("handshake initilazated")
+        print("Sending handshake")
         self.seq += 1
         payload = {
             "ver": 11,
@@ -18,4 +18,4 @@ def send_handshake(self):
                 "draftsSync": 0
             }
         }
-        self.send(payload)
+        self.send(payload, send_type="Handshake")

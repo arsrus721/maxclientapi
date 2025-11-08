@@ -35,8 +35,8 @@ def listen_handler(self):
                                     "height": attach.get("height"),
                                     "raw": attach
                                 }
-                                self.messages_128.put(media_info)
-                                print(f"Photo from {sender}: {attach.get('baseUrl')}")
+                                self.messages.put(media_info)
+                                print(f"Photo from {sender}")
 
                             elif media_type == "VIDEO":
                                 message_id = message_data.get("id")
@@ -53,8 +53,8 @@ def listen_handler(self):
                                     "raw": attach,
                                     "id": message_id
                                 }
-                                self.messages_128.put(media_info)
-                                print(f"Video from {sender}: {attach.get('thumbnail')}")
+                                self.messages.put(media_info)
+                                print(f"Video from {sender}")
 
 
                             elif media_type == "FILE":
@@ -63,10 +63,10 @@ def listen_handler(self):
                                     "type": "file",
                                     "chatId": chat_id,
                                     "sender": sender,
-                                    "id": message_id
-                                    "name": attach.get("name")
-                                    "size": attach.get("size")
-                                    "fileId": attach.get("fileId")
+                                    "id": message_id,
+                                    "name": attach.get("name"),
+                                    "size": attach.get("size"),
+                                    "fileId": attach.get("fileId"),
                                     "token": attach.get("token")
                                 }
 
@@ -78,7 +78,7 @@ def listen_handler(self):
                             "sender": sender,
                             "text": text
                         }
-                        self.messages_128.put(text_info)
+                        self.messages.put(text_info)
                         print(f"Text from {sender}: {text}")
 
                 elif opcode == 83:
@@ -93,10 +93,8 @@ def listen_handler(self):
                         "mp4_1080": mp4_1080,
                         "raw": payload
                     }
-                    self.messages_128.put(download_info)
-                    print(f"Gotted url:\n"
-                          f"   Page: {external_url}\n"
-                          f"   URL: {mp4_1080}")
+                    self.messages.put(download_info)
+                    print("Gotted url")
                     
                 elif opcode == 87:
                     url = json_load["payload"]["info"][0]["url"]
@@ -109,7 +107,7 @@ def listen_handler(self):
                         "token": token,
                         "fileId": fileId
                     }
-                    self.messages_128.put(url_from_87)
+                    self.messages.put(url_from_87)
 
             except WebSocketConnectionClosedException:
                 print("Connection closed")

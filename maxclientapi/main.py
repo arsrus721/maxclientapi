@@ -21,7 +21,7 @@ class ChatClient:
         self.osVersion = osVersion or "Linux"
         self.deviceId = deviceId
         self.origin = origin or "https://web.max.ru"
-        self.messages_128 = Queue()
+        self.messages = Queue()
 
     def connect(self):
         headers = [
@@ -30,13 +30,12 @@ class ChatClient:
         ]
     
         try:
-            print(f"Try to connect to {self.url}")
+            print(f"Try to connect")
             self.ws = create_connection(self.url, header=[f"{h[0]}: {h[1]}" for h in headers])
             print("Connected")
         
             self.running = True
             threading.Thread(target=self.listen_handler, daemon=True).start()
-            print(" Sending handshake")
             self.send_info()
     
         except Exception as e:
@@ -44,7 +43,8 @@ class ChatClient:
             self.running = False
 
     def send_info(self):
-        print("send info")
+        print("Sending info")
+        self.seq += 1
         payload = {"ver":11,
                    "cmd":0,
                    "seq":self.seq,
@@ -64,7 +64,7 @@ class ChatClient:
                         "deviceId":self.deviceId
                         }
                     }
-        self.send(payload)
+        self.send(payload, send_type="Info")
         self.send_handshake()
 
     send_handshake = send_handshake
@@ -79,14 +79,14 @@ class ChatClient:
                        "chatIds":[0]
                        }
                     }
-        
-        self.send(payload)
+        print("Attention, the code to request messages is not fully implemented yet.")
+        self.send(payload, send_type="Request messages")
 
     listen_handler = listen_handler
 
     def get_message(self, block=False, timeout=None):
         try:
-            return self.messages_128.get(block=block, timeout=timeout)
+            return self.messages.get(block=block, timeout=timeout)
         except:
             return None
 
@@ -102,7 +102,7 @@ class ChatClient:
                        "messageId":messageId
                        }
                     }
-        self.send(payload)
+        self.send(payload, send_type="Get video URL")
 
     def subscribe_chat(self, chat_id):
         self.seq += 1
@@ -115,7 +115,7 @@ class ChatClient:
                        "subscribe":True
                        }
                     }
-        self.send(payload)
+        self.send(payload, send_type="Subscribe chat")
         print(f"Subscribed to chat: {chat_id}")
 
     def send_message(self, chat_id, text):
@@ -137,8 +137,8 @@ class ChatClient:
             }
         }
 
-        self.send(payload)
-        print(f"Message send to chat: {chat_id} with text: {text}")
+        self.send(payload, send_type="Message")
+
         self.seq += 1
         payload_1 = {"ver":11,
                      "cmd":0,
@@ -150,6 +150,7 @@ class ChatClient:
                          }
                     }
         self.send(payload_1)
+        print(f"Message send to chat: {chat_id} with text: {text}")
 
     def request_url_to_send_file(self, count=1):
         self.seq += 1
@@ -161,8 +162,7 @@ class ChatClient:
                        "count":count
                        }
                     }
-        #print("The code to send files is not implemented yet.")
-        self.send(payload)
+        self.send(payload, send_type="Request URL to send file")
 
     def send_file(self, chatId, fileId):
         self.seq += 1
@@ -184,13 +184,13 @@ class ChatClient:
                                 "notify":True
                                 }
                             }
-        self.send(payload)
+        self.send(payload, send_type="File")
 
-    def send(self, data):
+    def send(self, data, send_type="Data"):
         if self.ws:
             try:
                 self.ws.send(json.dumps(data))
-                print(f"Data sucessfully sent: {json.dumps(data, indent=2)}")
+                print(f"{send_type} sucessfully sent") #{json.dumps(data, indent=2)}
             except Exception as e:
                 print(f"Unknown error: {e}")
         else:
