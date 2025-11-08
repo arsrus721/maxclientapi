@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="maxclientapi",
-    version="2.6.0",
+    version="2.7.0",
     packages=find_packages(),
     install_requires=["websocket-client"], 
     author="arsrus721",

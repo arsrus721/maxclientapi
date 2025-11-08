@@ -195,8 +195,6 @@ class ChatClient:
                 print(f"Unknown error: {e}")
         else:
             print("No active WebSocket connection")
-            print("Reconnecting...")
-            self.connect()
 
     start_keepalive = start_keepalive
 
