@@ -193,6 +193,5 @@ def listen_handler(self):
                 continue
 
     finally:
-        if self.ws:
-            self.ws.close()
-            print("ws closed")
+        self.stop()
+        print("[MAXCLIENTAPI][LISTEN_HANDLER] WebSocket stop")

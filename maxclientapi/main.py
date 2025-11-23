@@ -8,7 +8,7 @@ from .send_handshake import send_handshake
 from queue import Queue
 
 class ChatClient:
-    def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None):
+    def __init__(self, token, deviceId, watch_chats=None, user_agent=None, deviceName=None, osVersion=None, origin=None, url=None, allow_reconnect=None, debug=None):
         self.url = url or "wss://ws-api.oneme.ru/websocket"
         self.token = token
         self.watch_chats = watch_chats or []
@@ -22,28 +22,36 @@ class ChatClient:
         self.deviceId = deviceId
         self.origin = origin or "https://web.max.ru"
         self.messages = Queue()
+        self.allow_reconnect = allow_reconnect or False
+        self.debug = debug or False
 
     def connect(self):
+        if self.allow_reconnect == True:
+            print("[MAXCLIENTAPI] auto reconnect turned on")
+        elif self.debug == True:
+            print("[MAXCLIENTAPI] debug mode is turned on")
+        elif self.debug and self.allow_reconnect == True:
+            print("[MAXCLIENTAPI] debug mode and auto reconnect is turned on")
+
         headers = [
             ("Origin", self.origin),
             ("User-Agent", self.user_agent)
         ]
     
         try:
-            print(f"Try to connect")
+            print(f"[MAXCLIENTAPI] Trying to connect")
             self.ws = create_connection(self.url, header=[f"{h[0]}: {h[1]}" for h in headers])
-            print("Connected")
+            print("[MAXCLIENTAPI] WebSocket connected")
         
             self.running = True
             threading.Thread(target=self.listen_handler, daemon=True).start()
             self.send_info()
     
         except Exception as e:
-            print(f"Unknown error: {e}")
+            print(f"[ERROR]: {e}")
             self.running = False
 
     def send_info(self):
-        print("Sending info")
         self.seq += 1
         payload = {"ver":11,
                    "cmd":0,
@@ -79,7 +87,7 @@ class ChatClient:
                        "chatIds":[0]
                        }
                     }
-        print("Attention, the code to request messages is not fully implemented yet.")
+        print("[WARNING] Attention, the code to request messages is not fully implemented yet.")
         self.send(payload, send_type="Request messages")
 
     listen_handler = listen_handler
@@ -116,7 +124,6 @@ class ChatClient:
                        }
                     }
         self.send(payload, send_type="Subscribe chat")
-        print(f"Subscribed to chat: {chat_id}")
 
     def send_message(self, chat_id, text):
         self.seq += 1
@@ -150,7 +157,6 @@ class ChatClient:
                          }
                     }
         self.send(payload_1)
-        print(f"Message send to chat: {chat_id} with text: {text}")
 
     def request_url_to_send_file(self, count=1):
         self.seq += 1
@@ -189,12 +195,21 @@ class ChatClient:
     def send(self, data, send_type="Data"):
         if self.ws:
             try:
-                self.ws.send(json.dumps(data))
-                print(f"{send_type} sucessfully sent") #{json.dumps(data, indent=2)}
+                if self.debug == True:
+                    self.ws.send(json.dumps(data))
+                    print(f"[MAXCLIENTAPI] The {send_type} sucessfully sent ")
+                    print(f"[MAXCLIENTAPI] Data: {data}")
+                else:
+                    self.ws.send(json.dumps(data))
+                    print(f"[MAXCLIENTAPI] The {send_type} sucessfully sent")
             except Exception as e:
-                print(f"Unknown error: {e}")
+                print(f"[ERROR]: {e}")
         else:
-            print("No active WebSocket connection")
+            print("[MAXCLIENTAPI] WebSocket connection is closed")
+            self.stop()
+            if self.allow_reconnect == True:
+                self.connect()
+                self.start_keepalive()
 
     start_keepalive = start_keepalive
 
